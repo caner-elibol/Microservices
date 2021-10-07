@@ -1,0 +1,31 @@
+Synchronous Messaging 
+
+Request/Response Cycle
+
+Requester will "wait" for response
+
+hhtp grpc
+
+sync call --> async task
+
+İstek yapan sync gönderdiği için görevi hala beklemek zorunda.
+ 
+Servisler arası messajlaşma
+
+Tend to Pair ----
+
+
+Asynchronous Messaging
+
+Request/Response Cycle yok
+
+istek yapan beklemez
+
+servisler arasında yaygın olarak kullanılır.
+
+arada event bus kullanılır (RabbitMQ)
+
+monolith event bus
+
+Mesaj bus masaj gibi persistancela kümelenebilir
+
