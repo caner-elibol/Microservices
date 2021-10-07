@@ -27,5 +27,6 @@ arada event bus kullanılır (RabbitMQ)
 
 monolith event bus
 
-Mesaj bus masaj gibi persistancela kümelenebilir
+Mesaj bus mesaj gibi persistancela kümelenebilir.
 
+https://www.youtube.com/watch?v=DgVjEo3OGBI
