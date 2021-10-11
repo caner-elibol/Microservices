@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using PlatformService.AsynDataServices;
 using PlatformService.Data;
 using PlatformService.Dtos;
 using PlatformService.Models;
@@ -18,15 +19,18 @@ namespace PlatformService.Controllers
         private readonly IPlatformRepo _repository;
         private readonly IMapper _mapper;
         private readonly ICommandDataClient _commandDataClient;
+        private readonly IMessageBusClient _msgBus;
 
         public PlatformsController(
             IPlatformRepo repos,
             IMapper mapper,
-            ICommandDataClient commandDataClient)
+            ICommandDataClient commandDataClient,
+            IMessageBusClient msgBusClient)
         {
             _repository = repos;
             _mapper = mapper;
             _commandDataClient = commandDataClient;
+            _msgBus = msgBusClient;
         }
         [HttpGet]
         public ActionResult<IEnumerable<PlatformReadDto>> GetPlatforms()
@@ -56,6 +60,8 @@ namespace PlatformService.Controllers
             _repository.SaveChanges();
 
             var platformReadDto = _mapper.Map<PlatformReadDto>(platformModel);
+
+            //Send Sync Message
             try
             {
                 await _commandDataClient.SendPlatformToCommand(platformReadDto);
@@ -65,9 +71,21 @@ namespace PlatformService.Controllers
                 Console.WriteLine($"--> Could not send synchronously: {ex.Message}");
             }
             Console.WriteLine("--> Posted Create Model..");
+
+            try
+            {
+                var pPDto = _mapper.Map<PlatformPublishedDto>(platformReadDto);
+                pPDto.Event = "Platform_Published";
+                _msgBus.PublishNewPlatform(pPDto);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"--> Could not send asynchronously: {ex.Message}");
+            }
             return CreatedAtRoute(nameof(GetPlatformById), new { Id = platformReadDto.Id }, platformReadDto);
             
 
         }
+
     }
 }
